@@ -3,6 +3,8 @@ import pandas   as pd
 import io
 import time
 
+from datetime import datetime
+
 """
 
 Example usage
@@ -40,6 +42,8 @@ def get_resultado(mode='acao'):
     df['roic']    = perc_to_float( df['roic']   )
     df['roe']     = perc_to_float( df['roe']    )
     df['c5y']     = perc_to_float( df['c5y']    )
+
+    df['data_coleta'] = datetime.now()
 
     time.sleep(1)
 
