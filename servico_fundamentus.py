@@ -33,6 +33,13 @@ def get_resultado(mode='acao'):
     
     if columns:
         df = df.rename(columns=columns)
+    
+    df['dy']      = perc_to_float( df['dy']     )
+    df['mrgebit'] = perc_to_float( df['mrgebit'])
+    df['mrgliq']  = perc_to_float( df['mrgliq'] )
+    df['roic']    = perc_to_float( df['roic']   )
+    df['roe']     = perc_to_float( df['roe']    )
+    df['c5y']     = perc_to_float( df['c5y']    )
 
     time.sleep(1)
 
@@ -92,3 +99,21 @@ def get_fii_columns():
         'Cap Rate': 'cap_rate',
         'Vacância Média': 'vacancia_media'
     }
+
+def perc_to_float(val):
+    """
+    Percent to float
+      - replace string in pt-br to float
+      - from '45,56%' to 0.4556
+
+    Input:
+        (DataFrame, column_name)
+    """
+
+    res = val
+    res = res.replace( to_replace=r'[%]', value='' , regex=True )
+    res = res.replace( to_replace=r'[.]', value='' , regex=True )
+    res = res.replace( to_replace=r'[,]', value='.', regex=True )
+    res = res.astype(float) / 100
+
+    return res
