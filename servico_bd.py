@@ -36,14 +36,14 @@ def criar_engine():
 def sql_insert_acao():
     return text("""
 INSERT INTO indicadores_fundamentalistas_acoes (
-    papel, cotacao, pl, pvp, psr, dy, pa, pcg, pebit, pacl,
-    evebit, evebitda, mrgebit, mrgliq, roic, roe, liqc, liq2m,
-    patrliq, divbpatr, c5y, data_coleta
+    papel, cotacao, pl, pvp, psr, dividend_yield, p_ativo, p_cap_giro, p_ebit, p_ativ_circ_liqs,
+    ev_ebit, ev_ebitda, mrg_ebit, mrg_liq, roic, roe, liq_corr, liq_2_meses,
+    patrim_liq, div_brut_patrim, cresc_rec_5_a, data_coleta
 )
 SELECT
-    :papel, :cotacao, :pl, :pvp, :psr, :dy, :pa, :pcg, :pebit, :pacl,
-    :evebit, :evebitda, :mrgebit, :mrgliq, :roic, :roe, :liqc, :liq2m,
-    :patrliq, :divbpatr, :c5y, :data_coleta
+    :papel, :cotacao, :pl, :pvp, :psr, :dividend_yield, :p_ativo, :p_cap_giro, :p_ebit, :p_ativ_circ_liqs,
+    :ev_ebit, :ev_ebitda, :mrg_ebit, :mrg_liq, :roic, :roe, :liq_corr, :liq_2_meses,
+    :patrim_liq, :div_brut_patrim, :cresc_rec_5_a, :data_coleta
 WHERE NOT EXISTS (
     SELECT 1
     FROM (
@@ -58,26 +58,63 @@ WHERE NOT EXISTS (
         last.pl         IS NOT DISTINCT FROM :pl AND
         last.pvp        IS NOT DISTINCT FROM :pvp AND
         last.psr        IS NOT DISTINCT FROM :psr AND
-        last.dy         IS NOT DISTINCT FROM :dy AND
-        last.pa         IS NOT DISTINCT FROM :pa AND
-        last.pcg        IS NOT DISTINCT FROM :pcg AND
-        last.pebit      IS NOT DISTINCT FROM :pebit AND
-        last.pacl       IS NOT DISTINCT FROM :pacl AND
-        last.evebit     IS NOT DISTINCT FROM :evebit AND
-        last.evebitda   IS NOT DISTINCT FROM :evebitda AND
-        last.mrgebit    IS NOT DISTINCT FROM :mrgebit AND
-        last.mrgliq     IS NOT DISTINCT FROM :mrgliq AND
+        last.dividend_yield         IS NOT DISTINCT FROM :dividend_yield AND
+        last.p_ativo         IS NOT DISTINCT FROM :p_ativo AND
+        last.p_cap_giro        IS NOT DISTINCT FROM :p_cap_giro AND
+        last.p_ebit      IS NOT DISTINCT FROM :p_ebit AND
+        last.p_ativ_circ_liqs       IS NOT DISTINCT FROM :p_ativ_circ_liqs AND
+        last.ev_ebit     IS NOT DISTINCT FROM :ev_ebit AND
+        last.ev_ebitda   IS NOT DISTINCT FROM :ev_ebitda AND
+        last.mrg_ebit    IS NOT DISTINCT FROM :mrg_ebit AND
+        last.mrg_liq     IS NOT DISTINCT FROM :mrg_liq AND
         last.roic       IS NOT DISTINCT FROM :roic AND
         last.roe        IS NOT DISTINCT FROM :roe AND
-        last.liqc       IS NOT DISTINCT FROM :liqc AND
-        last.liq2m      IS NOT DISTINCT FROM :liq2m AND
-        last.patrliq    IS NOT DISTINCT FROM :patrliq AND
-        last.divbpatr   IS NOT DISTINCT FROM :divbpatr AND
-        last.c5y        IS NOT DISTINCT FROM :c5y
+        last.liq_corr       IS NOT DISTINCT FROM :liq_corr AND
+        last.liq_2_meses      IS NOT DISTINCT FROM :liq_2_meses AND
+        last.patrim_liq    IS NOT DISTINCT FROM :patrim_liq AND
+        last.div_brut_patrim   IS NOT DISTINCT FROM :div_brut_patrim AND
+        last.cresc_rec_5_a        IS NOT DISTINCT FROM :cresc_rec_5_a
 );
 """)
 
-def insert_data(conn, df):
+def sql_insert_fii():
+    return text("""
+INSERT INTO indicadores_fundamentalistas_fii (
+    papel, cotacao, segmento, ffo_yield, dividend_yield, pvp, valor_mercado,
+    liquidez, qtd_imoveis, preco_m2, aluguel_m2, cap_rate, vacancia_media,
+    data_coleta
+)
+SELECT
+    :papel, :cotacao, :segmento, :ffo_yield, :dividend_yield, :pvp, :valor_mercado,
+    :liquidez, :qtd_imoveis, :preco_m2, :aluguel_m2, :cap_rate, :vacancia_media,
+    :data_coleta
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM (
+        SELECT *
+        FROM indicadores_fundamentalistas_fii
+        WHERE papel = :papel
+        ORDER BY data_coleta DESC
+        LIMIT 1
+    ) last
+    WHERE
+        last.cotacao    IS NOT DISTINCT FROM :cotacao AND
+        last.segmento   IS NOT DISTINCT FROM :segmento AND
+        last.cotacao    IS NOT DISTINCT FROM :cotacao AND
+        last.ffo_yield  IS NOT DISTINCT FROM :ffo_yield AND
+        last.dividend_yield IS NOT DISTINCT FROM :dividend_yield AND
+        last.pvp        IS NOT DISTINCT FROM :pvp AND
+        last.valor_mercado IS NOT DISTINCT FROM :valor_mercado AND
+        last.liquidez   IS NOT DISTINCT FROM :liquidez AND
+        last.qtd_imoveis IS NOT DISTINCT FROM :qtd_imoveis AND
+        last.preco_m2   IS NOT DISTINCT FROM :preco_m2 AND
+        last.aluguel_m2 IS NOT DISTINCT FROM :aluguel_m2 AND
+        last.cap_rate   IS NOT DISTINCT FROM :cap_rate AND
+        last.vacancia_media IS NOT DISTINCT FROM :vacancia_media
+);
+""")
+
+def insert_data(conn, df, mode):
     """
     Insere dados no banco de dados
     Input:
@@ -85,4 +122,7 @@ def insert_data(conn, df):
     Output:
         número de registros inseridos
     """
-    return conn.execute(sql_insert_acao(), df.to_dict())
+    if mode == 'fii':
+        return conn.execute(sql_insert_fii(), df.to_dict())
+    else:  # mode == 'acao'
+        return conn.execute(sql_insert_acao(), df.to_dict())
