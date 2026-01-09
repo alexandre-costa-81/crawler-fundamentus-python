@@ -1,1 +1,1 @@
-* * * * * DB_HOST=postgres DB_NAME=fundamentus DB_USER=fundamentus DB_PASS=fundamentus /usr/local/bin/python /app/coleta_fundamentus.py >> /var/log/fundamentus.log 2>&1
+* * * * * DB_HOST=postgres DB_NAME=fundamentus DB_USER=fundamentus DB_PASS=fundamentus /usr/local/bin/python /app/coleta_fundamentus.py >> /app/fundamentus.log 2>&1
