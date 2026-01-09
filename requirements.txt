@@ -2,3 +2,4 @@ fundamentus
 pandas
 sqlalchemy
 psycopg2-binary
+html5lib
