@@ -1,1 +1,0 @@
-* * * * * /usr/local/bin/python /app/coleta_fundamentus.py >> /app/logs/fundamentus.log 2>&1
