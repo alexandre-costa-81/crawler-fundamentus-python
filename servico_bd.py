@@ -1,5 +1,6 @@
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 from sqlalchemy import create_engine, text
 
 def criar_engine():
@@ -11,7 +12,9 @@ def criar_engine():
     # ==========================================================
     # Conexão com o banco (via variáveis de ambiente)
     # ==========================================================
-    load_dotenv()
+    BASE_DIR = Path(__file__).resolve().parent
+    load_dotenv(BASE_DIR / '.env')
+
     DB_HOST = os.getenv("DB_HOST")
     DB_NAME = os.getenv("DB_NAME")
     DB_USER = os.getenv("DB_USER")
