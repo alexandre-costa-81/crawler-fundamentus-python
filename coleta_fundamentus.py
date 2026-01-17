@@ -2,8 +2,8 @@ from servico_fundamentus import get_resultado
 from servico_bd import criar_engine, insert_data, get_or_create_ticker_id
 from datetime import datetime
 
-# modalidades = ['acao', 'fii']
-modalidades = ['acao']
+modalidades = ['acao', 'fii']
+# modalidades = ['acao']
 
 for modalidade in modalidades:
     df = get_resultado(mode=modalidade)
@@ -12,7 +12,10 @@ for modalidade in modalidades:
 
     with engine.begin() as conn:
         for _, row in df.iterrows():
-            row['ticker_id'] = get_or_create_ticker_id(conn, row['ticker'])
+            if modalidade == 'fii':
+                row['ticker_id'] = get_or_create_ticker_id(conn, row['ticker'], segment=row['segment'])
+            else:
+                row['ticker_id'] = get_or_create_ticker_id(conn, row['ticker'])
             result = insert_data(conn, row, mode=modalidade)
             inseridos += result.rowcount
 

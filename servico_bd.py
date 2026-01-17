@@ -81,42 +81,40 @@ WHERE NOT EXISTS (
 
 def sql_insert_fii():
     return text("""
-INSERT INTO indicadores_fundamentalistas_fii (
-    papel, cotacao, segmento, ffo_yield, dividend_yield, pvp, valor_mercado,
-    liquidez, qtd_imoveis, preco_m2, aluguel_m2, cap_rate, vacancia_media,
-    data_coleta
+INSERT INTO reit_fundamental_indicators (
+    ticker_id, price, ffo_yield, dividend_yield, pb_ratio, market_value,
+    liquidity, property_count, price_per_sqm, rent_per_sqm, cap_rate, avg_vacancy_rate,
+    created_at, updated_at
 )
 SELECT
-    :papel, :cotacao, :segmento, :ffo_yield, :dividend_yield, :pvp, :valor_mercado,
-    :liquidez, :qtd_imoveis, :preco_m2, :aluguel_m2, :cap_rate, :vacancia_media,
-    :data_coleta
+    :ticker_id, :price, :ffo_yield, :dividend_yield, :pb_ratio, :market_value,
+    :liquidity, :property_count, :price_per_sqm, :rent_per_sqm, :cap_rate, :avg_vacancy_rate,
+    :created_at, :updated_at
 WHERE NOT EXISTS (
     SELECT 1
     FROM (
         SELECT *
-        FROM indicadores_fundamentalistas_fii
-        WHERE papel = :papel
-        ORDER BY data_coleta DESC
+        FROM reit_fundamental_indicators
+        WHERE ticker_id = :ticker_id
+        ORDER BY created_at DESC
         LIMIT 1
     ) last
     WHERE
-        last.cotacao    IS NOT DISTINCT FROM :cotacao AND
-        last.segmento   IS NOT DISTINCT FROM :segmento AND
-        last.cotacao    IS NOT DISTINCT FROM :cotacao AND
+        last.price    IS NOT DISTINCT FROM :price AND
         last.ffo_yield  IS NOT DISTINCT FROM :ffo_yield AND
         last.dividend_yield IS NOT DISTINCT FROM :dividend_yield AND
-        last.pvp        IS NOT DISTINCT FROM :pvp AND
-        last.valor_mercado IS NOT DISTINCT FROM :valor_mercado AND
-        last.liquidez   IS NOT DISTINCT FROM :liquidez AND
-        last.qtd_imoveis IS NOT DISTINCT FROM :qtd_imoveis AND
-        last.preco_m2   IS NOT DISTINCT FROM :preco_m2 AND
-        last.aluguel_m2 IS NOT DISTINCT FROM :aluguel_m2 AND
+        last.pb_ratio        IS NOT DISTINCT FROM :pb_ratio AND
+        last.market_value IS NOT DISTINCT FROM :market_value AND
+        last.liquidity   IS NOT DISTINCT FROM :liquidity AND
+        last.property_count IS NOT DISTINCT FROM :property_count AND
+        last.price_per_sqm   IS NOT DISTINCT FROM :price_per_sqm AND
+        last.rent_per_sqm IS NOT DISTINCT FROM :rent_per_sqm AND
         last.cap_rate   IS NOT DISTINCT FROM :cap_rate AND
-        last.vacancia_media IS NOT DISTINCT FROM :vacancia_media
+        last.avg_vacancy_rate IS NOT DISTINCT FROM :avg_vacancy_rate
 );
 """)
 
-def get_or_create_ticker_id(conn, ticker):
+def get_or_create_ticker_id(conn, ticker, segment=None):
     """
     Busca o ticker na tabela tickers; se não existir, insere e retorna o id.
     """
@@ -125,8 +123,12 @@ def get_or_create_ticker_id(conn, ticker):
     if existing:
         return existing
 
-    insert_ticker_query = text("INSERT INTO tickers (symbol, created_at, updated_at) VALUES (:ticker, NOW(), NOW()) RETURNING id")
-    return conn.execute(insert_ticker_query, {"ticker": ticker}).scalar()
+    if segment:
+        insert_ticker_query = text("INSERT INTO tickers (symbol, segment, created_at, updated_at) VALUES (:ticker, :segment, NOW(), NOW()) RETURNING id")
+    else:
+        insert_ticker_query = text("INSERT INTO tickers (symbol, created_at, updated_at) VALUES (:ticker, NOW(), NOW()) RETURNING id")
+
+    return conn.execute(insert_ticker_query, {"ticker": ticker, "segment": segment}).scalar()
 
 def insert_data(conn, df, mode):
     """

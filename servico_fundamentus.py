@@ -38,16 +38,16 @@ def get_resultado(mode='acao'):
     
     if mode == 'acao':
         df['dividend_yield']    = perc_to_float(df['dividend_yield'])
-        df['ebit_margin']          = perc_to_float(df['ebit_margin'])
-        df['net_margin']           = perc_to_float(df['net_margin'])
+        df['ebit_margin']       = perc_to_float(df['ebit_margin'])
+        df['net_margin']        = perc_to_float(df['net_margin'])
         df['roic']              = perc_to_float(df['roic'])
         df['roe']               = perc_to_float(df['roe'])
-        df['revenue_growth_5y']     = perc_to_float(df['revenue_growth_5y'])
+        df['revenue_growth_5y'] = perc_to_float(df['revenue_growth_5y'])
     elif mode == 'fii':
         df['ffo_yield']         = perc_to_float(df['ffo_yield'])
         df['dividend_yield']    = perc_to_float(df['dividend_yield'])
         df['cap_rate']          = perc_to_float(df['cap_rate'])
-        df['vacancia_media']    = perc_to_float(df['vacancia_media'])
+        df['avg_vacancy_rate']  = perc_to_float(df['avg_vacancy_rate'])
 
     df['created_at'] = datetime.now()
     df['updated_at'] = datetime.now()
@@ -96,19 +96,19 @@ def get_fii_url():
 
 def get_fii_columns():
     return {
-        'Papel': 'papel',
-        'Segmento': 'segmento',
-        'Cotação': 'cotacao',
+        'Papel': 'ticker',
+        'Segmento': 'segment',
+        'Cotação': 'price',
         'FFO Yield': 'ffo_yield',
         'Dividend Yield': 'dividend_yield',
-        'P/VP': 'pvp',
-        'Valor de Mercado': 'valor_mercado',
-        'Liquidez': 'liquidez',
-        'Qtd de imóveis': 'qtd_imoveis',
-        'Preço do m2': 'preco_m2',
-        'Aluguel por m2': 'aluguel_m2',
+        'P/VP': 'pb_ratio',
+        'Valor de Mercado': 'market_value',
+        'Liquidez': 'liquidity',
+        'Qtd de imóveis': 'property_count',
+        'Preço do m2': 'price_per_sqm',
+        'Aluguel por m2': 'rent_per_sqm',
         'Cap Rate': 'cap_rate',
-        'Vacância Média': 'vacancia_media'
+        'Vacância Média': 'avg_vacancy_rate'
     }
 
 def perc_to_float(val):
