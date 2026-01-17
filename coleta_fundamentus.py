@@ -1,8 +1,9 @@
 from servico_fundamentus import get_resultado
-from servico_bd import criar_engine, insert_data
+from servico_bd import criar_engine, insert_data, get_or_create_ticker_id
 from datetime import datetime
 
-modalidades = ['acao', 'fii']
+# modalidades = ['acao', 'fii']
+modalidades = ['acao']
 
 for modalidade in modalidades:
     df = get_resultado(mode=modalidade)
@@ -11,12 +12,13 @@ for modalidade in modalidades:
 
     with engine.begin() as conn:
         for _, row in df.iterrows():
+            row['ticker_id'] = get_or_create_ticker_id(conn, row['ticker'])
             result = insert_data(conn, row, mode=modalidade)
             inseridos += result.rowcount
 
     print(
         f"✅ Coleta finalizada | "
-        f"Papeis processados: {df['papel'].nunique()} | "
+        f"Papeis processados: {df['ticker'].nunique()} | "
         f"Novos registros (mudança detectada): {inseridos} | "
         f"Horário: {datetime.now()}"
     )

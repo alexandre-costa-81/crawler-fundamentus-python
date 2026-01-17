@@ -38,18 +38,19 @@ def get_resultado(mode='acao'):
     
     if mode == 'acao':
         df['dividend_yield']    = perc_to_float(df['dividend_yield'])
-        df['mrg_ebit']          = perc_to_float(df['mrg_ebit'])
-        df['mrg_liq']           = perc_to_float(df['mrg_liq'])
+        df['ebit_margin']          = perc_to_float(df['ebit_margin'])
+        df['net_margin']           = perc_to_float(df['net_margin'])
         df['roic']              = perc_to_float(df['roic'])
         df['roe']               = perc_to_float(df['roe'])
-        df['cresc_rec_5_a']     = perc_to_float(df['cresc_rec_5_a'])
+        df['revenue_growth_5y']     = perc_to_float(df['revenue_growth_5y'])
     elif mode == 'fii':
         df['ffo_yield']         = perc_to_float(df['ffo_yield'])
         df['dividend_yield']    = perc_to_float(df['dividend_yield'])
         df['cap_rate']          = perc_to_float(df['cap_rate'])
         df['vacancia_media']    = perc_to_float(df['vacancia_media'])
 
-    df['data_coleta'] = datetime.now()
+    df['created_at'] = datetime.now()
+    df['updated_at'] = datetime.now()
 
     time.sleep(1)
 
@@ -67,27 +68,27 @@ def get_acao_url():
 
 def get_acoes_columns():
     return {
-        'Papel': 'papel',
-        'Cotação': 'cotacao',
-        'P/L': 'pl',
-        'P/VP': 'pvp',
-        'PSR': 'psr',
+        'Papel': 'ticker',
+        'Cotação': 'price',
+        'P/L': 'pe_ratio',
+        'P/VP': 'pb_ratio',
+        'PSR': 'ps_ratio',
         'Div.Yield': 'dividend_yield',
-        'P/Ativo': 'p_ativo',
-        'P/Cap.Giro': 'p_cap_giro',
-        'P/EBIT': 'p_ebit',
-        'P/Ativ Circ.Liq': 'p_ativ_circ_liqs',
-        'EV/EBIT': 'ev_ebit',
-        'EV/EBITDA': 'ev_ebitda',
-        'Mrg Ebit': 'mrg_ebit',
-        'Mrg. Líq.': 'mrg_liq',
+        'P/Ativo': 'price_to_assets',
+        'P/Cap.Giro': 'price_to_working_capital',
+        'P/EBIT': 'price_to_ebit',
+        'P/Ativ Circ.Liq': 'price_to_current_assets',
+        'EV/EBIT': 'ev_to_ebit',
+        'EV/EBITDA': 'ev_to_ebitda',
+        'Mrg Ebit': 'ebit_margin',
+        'Mrg. Líq.': 'net_margin',
         'ROIC': 'roic',
         'ROE': 'roe',
-        'Liq. Corr.': 'liq_corr',
-        'Liq.2meses': 'liq_2_meses',
-        'Patrim. Líq': 'patrim_liq',
-        'Dív.Brut/ Patrim.': 'div_brut_patrim',
-        'Cresc. Rec.5a': 'cresc_rec_5_a'
+        'Liq. Corr.': 'current_ratio',
+        'Liq.2meses': 'avg_liquidity_2_months',
+        'Patrim. Líq': 'net_equity',
+        'Dív.Brut/ Patrim.': 'gross_debt_to_equity',
+        'Cresc. Rec.5a': 'revenue_growth_5y'
     }
 
 def get_fii_url():
@@ -125,5 +126,8 @@ def perc_to_float(val):
     res = res.replace( to_replace=r'[.]', value='' , regex=True )
     res = res.replace( to_replace=r'[,]', value='.', regex=True )
     res = res.astype(float) / 100
+    
+    # Arredondar para 8 casas decimais para evitar imprecisão de ponto flutuante
+    res = res.round(8)
 
     return res
